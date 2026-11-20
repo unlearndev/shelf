@@ -13,6 +13,12 @@ export function openDatabase(path = 'data/shelf.db'): DB {
       finished_on TEXT
     )
   `)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS goals (
+      year INTEGER PRIMARY KEY,
+      target INTEGER NOT NULL CHECK (target > 0)
+    )
+  `)
   migrate(db)
   return db
 }
