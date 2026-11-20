@@ -1,0 +1,22 @@
+{
+  "name": "shelf",
+  "private": true,
+  "version": "0.3.0",
+  "description": "A reading list: what you want to read, what you're reading, and what you've finished",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "dev": "vite",
+    "test": "node --disable-warning=ExperimentalWarning --test",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm test",
+    "db:seed": "node --disable-warning=ExperimentalWarning server/seed.ts"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "typescript": "7.0.2",
+    "vite": "8.3.5"
+  }
+}
