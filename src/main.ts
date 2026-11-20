@@ -11,6 +11,13 @@ type Book = {
   rated_on: string | null
 }
 
+type GoalProgress = {
+  year: number
+  target: number | null
+  finished: number
+  percent: number | null
+}
+
 type ShelfStats = {
   finished: number
   rated: number
@@ -40,6 +47,7 @@ const SORT_LABELS: Record<SortBy, string> = {
 
 const shelf = document.querySelector<HTMLElement>('#shelf')!
 const form = document.querySelector<HTMLFormElement>('#add-book')!
+const goal = document.querySelector<HTMLElement>('#goal')!
 
 // The sort only applies to the finished column, and it's remembered between visits.
 const savedSort = localStorage.getItem('shelf.sort')
@@ -132,12 +140,37 @@ function average(stats: ShelfStats): string {
   return `Average ${stats.averageRating.toFixed(1)} ★ from ${stats.rated} rated`
 }
 
+// This year's goal: a bar showing how far along you are, and a button to change it.
+function renderGoal(progress: GoalProgress) {
+  const text = progress.target
+    ? `${progress.finished} of ${progress.target} books in ${progress.year}`
+    : `${progress.finished} books finished in ${progress.year}`
+  goal.innerHTML = `<p class="goal-text"></p><div class="goal-bar"><div class="goal-fill"></div></div>`
+  goal.querySelector('.goal-text')!.textContent = text
+  goal.querySelector<HTMLElement>('.goal-fill')!.style.width = `${progress.percent ?? 0}%`
+  const button = document.createElement('button')
+  button.textContent = progress.target ? 'Change goal' : 'Set a goal'
+  button.onclick = async () => {
+    const answer = prompt(`How many books do you want to finish in ${progress.year}?`, String(progress.target ?? 12))
+    if (!answer) return
+    try {
+      await api('/api/goal', 'PUT', { target: Number(answer) })
+    } catch (error) {
+      alert((error as Error).message)
+    }
+    render()
+  }
+  goal.append(button)
+}
+
 async function render() {
-  const [books, sorted, stats] = await Promise.all([
+  const [books, sorted, stats, progress] = await Promise.all([
     api<Book[]>('/api/books'),
     api<Book[]>(`/api/books?sort=${sortBy}`),
     api<ShelfStats>('/api/stats'),
+    api<GoalProgress>('/api/goal'),
   ])
+  renderGoal(progress)
   shelf.replaceChildren(
     ...COLUMNS.map(({ status, heading }) => {
       const column = document.createElement('section')

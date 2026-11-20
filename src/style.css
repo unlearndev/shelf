@@ -134,3 +134,30 @@ button {
 .star:hover {
   transform: scale(1.15);
 }
+
+#goal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-right: auto;
+  margin-left: 24px;
+}
+
+.goal-text {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.goal-bar {
+  width: 160px;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.goal-fill {
+  height: 100%;
+  background: var(--accent);
+}
