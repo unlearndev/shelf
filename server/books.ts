@@ -8,6 +8,8 @@ export type Book = {
   author: string
   status: Status
   finished_on: string | null
+  rating: number | null
+  rated_on: string | null
 }
 
 const STATUSES: Status[] = ['want', 'reading', 'finished']
@@ -31,7 +33,8 @@ export function addBook(db: DB, title: string, author: string): Book {
   return getBook(db, Number(lastInsertRowid))
 }
 
-// Moving a book to finished records the day; moving it back clears it.
+// Moving a book to finished records the day; moving it back clears the day.
+// The rating stays, so a book you read again still shows what you gave it.
 export function setStatus(db: DB, id: number, status: Status, today: string): Book {
   if (!STATUSES.includes(status)) throw new Error(`Unknown status: ${status}`)
   getBook(db, id)

@@ -13,5 +13,20 @@ export function openDatabase(path = 'data/shelf.db'): DB {
       finished_on TEXT
     )
   `)
+  migrate(db)
   return db
+}
+
+// Columns added after the first release. Each one checks before it runs,
+// so opening an existing database is safe.
+function migrate(db: DB) {
+  const columns = db.prepare('PRAGMA table_info(books)').all() as { name: string }[]
+  const has = (name: string) => columns.some((column) => column.name === name)
+
+  if (!has('rating')) {
+    db.exec('ALTER TABLE books ADD COLUMN rating INTEGER')
+  }
+  if (!has('rated_on')) {
+    db.exec('ALTER TABLE books ADD COLUMN rated_on TEXT')
+  }
 }
