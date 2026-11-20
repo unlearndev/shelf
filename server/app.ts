@@ -2,12 +2,14 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import { openDatabase, type DB } from './db.ts'
 import { addBook, listBooks, setStatus, type Status } from './books.ts'
 import { clearRating, rateBook } from './ratings.ts'
-import { SORTS, shelfStats, sortBooks, type SortBy } from './stats.ts'
+import { SORTS, goalProgress, shelfStats, sortBooks, type SortBy } from './stats.ts'
+import { getGoal, setGoal } from './goals.ts'
 
 let db: DB | undefined
 const database = () => (db ??= openDatabase())
 
 const today = () => new Date().toISOString().slice(0, 10)
+const thisYear = () => Number(today().slice(0, 4))
 
 async function readJson(req: IncomingMessage): Promise<Record<string, unknown>> {
   let body = ''
@@ -33,6 +35,16 @@ export async function route(conn: DB, req: IncomingMessage): Promise<[number, un
   }
   if (req.method === 'GET' && url.pathname === '/api/stats') {
     return [200, shelfStats(listBooks(conn))]
+  }
+  if (req.method === 'GET' && url.pathname === '/api/goal') {
+    const year = thisYear()
+    return [200, goalProgress(listBooks(conn), year, getGoal(conn, year)?.target ?? null)]
+  }
+  if (req.method === 'PUT' && url.pathname === '/api/goal') {
+    const { target } = await readJson(req)
+    const year = thisYear()
+    setGoal(conn, year, Number(target))
+    return [200, goalProgress(listBooks(conn), year, Number(target))]
   }
   if (req.method === 'POST' && url.pathname === '/api/books') {
     const { title, author } = await readJson(req)

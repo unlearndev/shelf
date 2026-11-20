@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import type { Book } from '../server/books.ts'
-import { shelfStats, sortBooks } from '../server/stats.ts'
+import { goalProgress, shelfStats, sortBooks } from '../server/stats.ts'
 
 const book = (id: number, fields: Partial<Book> = {}): Book => ({
   id,
@@ -58,4 +58,22 @@ test('the average only counts rated books, to one decimal place', () => {
 
 test('with nothing rated there is no average', () => {
   assert.deepEqual(shelfStats([book(1)]), { finished: 1, rated: 0, averageRating: null })
+})
+
+test('goal progress counts the books finished that year', () => {
+  const books = [
+    book(1, { finished_on: '2026-02-01' }),
+    book(2, { finished_on: '2025-12-30' }),
+    book(3, { finished_on: '2026-09-01' }),
+    book(4, { status: 'reading', finished_on: null }),
+  ]
+  assert.deepEqual(goalProgress(books, 2026, 4), { year: 2026, target: 4, finished: 2, percent: 50 })
+})
+
+test('progress stops at 100 percent', () => {
+  assert.equal(goalProgress([book(1), book(2)], 2026, 1).percent, 100)
+})
+
+test('with no goal there is no percentage', () => {
+  assert.deepEqual(goalProgress([book(1)], 2026, null), { year: 2026, target: null, finished: 1, percent: null })
 })

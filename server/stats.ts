@@ -44,3 +44,21 @@ export function shelfStats(books: Book[]): ShelfStats {
     averageRating: ratings.length ? Math.round((total / ratings.length) * 10) / 10 : null,
   }
 }
+
+export type GoalProgress = {
+  year: number
+  target: number | null
+  finished: number
+  percent: number | null
+}
+
+// Books finished in the given year, against the goal for that year.
+export function goalProgress(books: Book[], year: number, target: number | null): GoalProgress {
+  const finished = books.filter((book) => book.status === 'finished' && book.finished_on?.startsWith(`${year}-`)).length
+  return {
+    year,
+    target,
+    finished,
+    percent: target ? Math.min(100, Math.round((finished / target) * 100)) : null,
+  }
+}

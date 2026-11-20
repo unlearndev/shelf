@@ -62,3 +62,17 @@ test('GET /api/stats returns the average rating', async () => {
   const [, stats] = await route(db, request('GET', '/api/stats'))
   assert.deepEqual(stats, { finished: 3, rated: 2, averageRating: 4.5 })
 })
+
+test('PUT /api/goal sets this year\'s goal and returns the progress', async () => {
+  const db = shelf()
+  const [status, progress] = await route(db, request('PUT', '/api/goal', { target: 12 }))
+  assert.equal(status, 200)
+  assert.equal((progress as { target: number }).target, 12)
+  const [, again] = await route(db, request('GET', '/api/goal'))
+  assert.equal((again as { target: number }).target, 12)
+})
+
+test('GET /api/goal with no goal set has no target', async () => {
+  const [, progress] = await route(shelf(), request('GET', '/api/goal'))
+  assert.equal((progress as { target: number | null }).target, null)
+})
