@@ -8,6 +8,8 @@ export type Book = {
   author: string
   status: Status
   finished_on: string | null
+  rating: number | null
+  rated_on: string | null
 }
 
 const STATUSES: Status[] = ['want', 'reading', 'finished']
@@ -31,11 +33,18 @@ export function addBook(db: DB, title: string, author: string): Book {
   return getBook(db, Number(lastInsertRowid))
 }
 
-// Moving a book to finished records the day; moving it back clears it.
+// Moving a book to finished records the day; moving it back clears it,
+// along with any rating, since you can only rate a book you've finished.
 export function setStatus(db: DB, id: number, status: Status, today: string): Book {
   if (!STATUSES.includes(status)) throw new Error(`Unknown status: ${status}`)
   getBook(db, id)
-  const finishedOn = status === 'finished' ? today : null
-  db.prepare('UPDATE books SET status = ?, finished_on = ? WHERE id = ?').run(status, finishedOn, id)
+  if (status === 'finished') {
+    db.prepare('UPDATE books SET status = ?, finished_on = ? WHERE id = ?').run(status, today, id)
+  } else {
+    db.prepare('UPDATE books SET status = ?, finished_on = NULL, rating = NULL, rated_on = NULL WHERE id = ?').run(
+      status,
+      id,
+    )
+  }
   return getBook(db, id)
 }

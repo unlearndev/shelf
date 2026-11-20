@@ -92,3 +92,45 @@ button {
   display: flex;
   gap: 6px;
 }
+
+.column-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.average {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.sort {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.stars {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 10px;
+}
+
+.star {
+  border: none;
+  background: none;
+  padding: 0 2px;
+  font-size: 20px;
+  line-height: 1;
+  color: #c9c2b6;
+}
+
+.star.on {
+  color: #d4932a;
+}
+
+.star:hover {
+  transform: scale(1.15);
+}
